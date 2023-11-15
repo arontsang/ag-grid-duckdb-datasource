@@ -1,0 +1,6 @@
+{
+  "name": "ag-grid-duckdb-datasource:wq",
+  "version": "0.0.1",
+  "description": "Server-side Datasource based on DuckDB.\nFor analytics/pivot tables.",
+  "private": true
+}
