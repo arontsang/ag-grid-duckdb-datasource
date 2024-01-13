@@ -9,11 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@duckdb/duckdb-wasm": "=1.28.0",
+    "ag-grid-community": "^31.0.1",
     "ag-grid-duckdb-datasource": "0.0.1",
+    "ag-grid-enterprise": "^31.0.1",
     "lit": "^3.1.0"
   },
   "devDependencies": {
     "typescript": "^5.2.2",
-    "vite": "^5.0.8"
+    "vite": "^5.0.11"
   }
 }

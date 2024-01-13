@@ -1,12 +1,12 @@
 import {IServerSideDatasource, IServerSideGetRowsParams} from "ag-grid-community";
-import type {Database as DuckDbDatabase} from 'duckdb-async';
+import {AsyncDuckDB} from "@duckdb/duckdb-wasm";
 
 export class DuckDbDatasource implements IServerSideDatasource {
 
-    private readonly database: DuckDbDatabase;
+    private readonly database: AsyncDuckDB;
 
 
-    constructor(database: DuckDbDatabase) {
+    constructor(database: AsyncDuckDB) {
         this.database = database;
     }
 
@@ -16,10 +16,10 @@ export class DuckDbDatasource implements IServerSideDatasource {
     async getRows(params: IServerSideGetRowsParams) {
         try {
             const [rows, totalRowCount] = await this.getRowsImpl(params);
-            params.successCallback(rows, totalRowCount);
+            params.success({ rowData: [], rowCount: 0 })
         }
         catch {
-            params.failCallback();
+            params.fail();
         }
     }
 
