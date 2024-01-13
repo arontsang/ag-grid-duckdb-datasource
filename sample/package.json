@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "ag-grid-duckdb-datasource": "0.0.1",
     "lit": "^3.1.0"
   },
   "devDependencies": {
