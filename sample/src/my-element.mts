@@ -29,10 +29,17 @@ https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.1/styles/ag-grid.min.css
   onDivChanged(div: Element | undefined): void {
     if (!div) return;
 
-    const datasource = new DuckDbDatasource(duckdb);
+    const src = new URL("/userdata1.parquet", document.baseURI).href
+    const source = `SELECT * FROM read_parquet('${src}')`;
+
+    const datasource = new DuckDbDatasource(duckdb, source);
     agGrid.createGrid(div as HTMLDivElement, {
       rowModelType: 'serverSide',
       serverSideDatasource: datasource,
+      columnDefs: [
+        { field: "first_name" },
+        { field: "last_name" },
+      ]
     });
   }
 }
