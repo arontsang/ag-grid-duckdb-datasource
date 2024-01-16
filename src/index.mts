@@ -42,7 +42,9 @@ export class DuckDbDatasource implements IServerSideDatasource {
             const result = await connection.query(query + this.buildLimit(params.request)).then(x => x.toArray());
             const count = await connection.query(`
                 SELECT COUNT(*)
-                FROM (${query})            
+                FROM (${query})  
+                
+                          
             `);
 
             const foo = count.getChildAt(0)!.get(0) as number;
@@ -59,8 +61,21 @@ export class DuckDbDatasource implements IServerSideDatasource {
         const sql = `
                 WITH SOURCE AS (${this.source})
                 SELECT * FROM SOURCE
+                ${this.buildOrderBy(request)}
         `
         return sql;
+    }
+
+    private buildOrderBy(request: IServerSideGetRowsRequest): string {
+        if (request.sortModel.length == 0)
+            return "";
+
+        const sort = request.sortModel
+            .map(x => `${x.colId} ${x.sort}`)
+            .join(", ")
+
+
+        return `ORDER BY ${sort}`;
     }
 
     private buildLimit(request: IServerSideGetRowsRequest): string {
