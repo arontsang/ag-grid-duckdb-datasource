@@ -4,6 +4,8 @@ import {DuckDbDatasource} from "ag-grid-duckdb-datasource/index.mjs";
 import 'ag-grid-enterprise';
 import duckdb from "./duckdb.ts"
 import * as agGrid from 'ag-grid-community';
+import 'ag-grid-community/styles/ag-grid.css'
+import 'ag-grid-community/styles/ag-theme-alpine.css'
 
 /**
  * An example element.
@@ -19,10 +21,9 @@ class AgGridDuckDb extends LitElement {
 
   render() {
     return html`
-      <link href="
-https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.1/styles/ag-grid.min.css
-" rel="stylesheet">
-      <div ${ref(this.onDivChanged)} style="width: 100%; height: 100%" />
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.1/styles/ag-grid.min.css" integrity="sha256-U46e4IPc0QQXJWqKQe+rlwkn7jjPSpEkzWtYCTuToN8=" crossorigin="anonymous" />
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.1/styles/ag-theme-alpine.min.css" integrity="sha256-BzxohCuzZdLPliAbgAT5KQ29FYtyht2TDX9MbVQxt0U=" crossorigin="anonymous">
+      <div  ${ref(this.onDivChanged)} class="ag-theme-alpine" style="width: 100%; height: 100%" />
     `
   }
 
@@ -39,6 +40,9 @@ https://cdn.jsdelivr.net/npm/ag-grid-community@31.0.1/styles/ag-grid.min.css
       columnDefs: [
         { field: "first_name" },
         { field: "last_name" },
+      ],
+      sideBar: [
+          'columns'
       ]
     });
   }
