@@ -37,8 +37,11 @@ class AgGridDuckDb extends LitElement {
     agGrid.createGrid(div as HTMLDivElement, {
       rowModelType: 'serverSide',
       serverSideDatasource: datasource,
+      defaultColDef: {
+        enableRowGroup: true
+      },
       columnDefs: [
-        { field: "first_name" },
+        { field: "first_name",  },
         { field: "last_name" },
       ],
       sideBar: [
