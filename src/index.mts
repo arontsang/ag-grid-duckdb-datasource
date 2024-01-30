@@ -77,7 +77,7 @@ export class DuckDbDatasource implements IServerSideDatasource {
                         values: async (params: { success: (item: unknown[]) => void }) => {
                             const query = `
                                 WITH SOURCE AS (${me.source})
-                                SELECT DISTINCT ${columnDef.field} FROM SOURCE LIMIT 30;
+                                SELECT DISTINCT ${columnDef.field} FROM SOURCE LIMIT 100;
                             `;
                             const results = await me.doQueryAsync(query);
                             const values = results.getChildAt(0)!.toArray();

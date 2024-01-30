@@ -1,6 +1,6 @@
 import {DuckDbDatasource} from "../index.mjs";
 import {IServerSideGetRowsRequest} from "ag-grid-community/dist/lib/interfaces/iServerSideDatasource";
-import {IServerSideGetRowsParams} from "ag-grid-community";
+import {ColumnVO, IServerSideGetRowsParams} from "ag-grid-community";
 import { whereFragment } from "../filter";
 
 export function buildGroupQuery(params: IServerSideGetRowsParams, datasource: DuckDbDatasource): string {
@@ -19,6 +19,7 @@ export function buildGroupQuery(params: IServerSideGetRowsParams, datasource: Du
             ${buildSelect(request)}
             FROM GROUPFILTERED
             ${buildGroupBy(request)}
+            ${buildOrderBy(request)}
         ) 
     `
 }
@@ -40,13 +41,16 @@ export function buildGroupFilter(request : IServerSideGetRowsRequest): string {
     return ` WHERE ${filterFragments.join(" AND ")}`
 }
 
-function buildSelect( request : IServerSideGetRowsRequest): string {
+function groupColumn(request : IServerSideGetRowsRequest): ColumnVO {
+    return request.rowGroupCols[request.groupKeys.length];
+}
+
+function buildSelect(request : IServerSideGetRowsRequest): string {
 
     if (request.rowGroupCols && request.groupKeys){
         if (request.groupKeys.length < request.rowGroupCols.length){
-            const column = request.rowGroupCols[request.groupKeys.length];
             const columns = [
-                request.rowGroupCols[request.groupKeys.length].field,
+                groupColumn(request).field,
                 ...request.valueCols.map(x => `${x.aggFunc}(${x.field}) AS ${x.field}`)
             ]
             return `SELECT ${columns.join(',')} `
@@ -54,6 +58,14 @@ function buildSelect( request : IServerSideGetRowsRequest): string {
     }
 
     return "SELECT *"
+}
+
+function buildOrderBy(request: IServerSideGetRowsRequest): string {
+    const col = groupColumn(request);
+    const sort = request.sortModel.filter(x => x.colId == col.field);
+    if (sort.length == 0) return "";
+
+    return `ORDER BY ${col.field} ${sort[0].sort}`
 }
 
 function buildGroupBy( request: IServerSideGetRowsRequest): string {
@@ -66,5 +78,4 @@ function buildGroupBy( request: IServerSideGetRowsRequest): string {
     }
 
     return "";
-
 }
