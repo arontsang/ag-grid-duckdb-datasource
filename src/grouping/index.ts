@@ -11,9 +11,13 @@ export function buildGroupQuery(params: IServerSideGetRowsParams, datasource: Du
             SELECT * FROM SOURCE
             ${whereFragment(request)}
         ),
+        GROUPFILTERED AS (
+            SELECT * FROM FILTERED
+            ${buildGroupFilter(request)}
+        ),
         QUERY AS (
             ${buildSelect(request)}
-            FROM FILTERED
+            FROM GROUPFILTERED
             ${buildGroupBy(request)}
         ) 
     `
