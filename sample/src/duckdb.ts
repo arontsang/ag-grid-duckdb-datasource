@@ -11,7 +11,7 @@ const worker_url = URL.createObjectURL(
 
 // Instantiate the asynchronus version of DuckDB-wasm
 const worker = new Worker(worker_url);
-const logger = new duckdb.ConsoleLogger();
+const logger = new duckdb.VoidLogger();
 const db = new duckdb.AsyncDuckDB(logger, worker);
 
 
