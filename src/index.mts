@@ -74,21 +74,10 @@ export class DuckDbDatasource implements IServerSideDatasource {
             return buildSimpleQuery(params, this);
         }
 
-        return buildGroupQuery(params.request, this);
+        return buildGroupQuery(params, this);
     }
 
-    private buildSelect({ request, api }: IServerSideGetRowsParams): string {
 
-        if (request.rowGroupCols && request.groupKeys){
-            if (request.groupKeys.length < request.rowGroupCols.length){
-                const column = request.rowGroupCols[request.groupKeys.length];
-
-                return `SELECT ${column.field} `
-            }
-        }
-
-        return "SELECT *"
-    }
 
 
 
@@ -99,18 +88,7 @@ export class DuckDbDatasource implements IServerSideDatasource {
         return "";
     }
 
-    private buildGroupBy({ request, api }: IServerSideGetRowsParams): string {
-        if (request.rowGroupCols && request.groupKeys){
-            if (request.groupKeys.length < request.rowGroupCols.length){
-                const column = request.rowGroupCols[request.groupKeys.length];
 
-                return `GROUP BY  ${column.field} `
-            }
-        }
-        
-        return "";
-
-    }
 
     private filterBy({ request, api }: IServerSideGetRowsParams<any, any>): string {
         const groupFilter =

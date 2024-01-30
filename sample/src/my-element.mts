@@ -45,6 +45,8 @@ class AgGridDuckDb extends LitElement {
       columnDefs: [
         { field: "first_name", filter: 'agTextColumnFilter'   },
         { field: "last_name", filter: 'agTextColumnFilter' },
+        { field: "gender", filter: 'agSetColumnFilter' },
+        { field: "country", filter: 'agSetColumnFilter' },
       ],
       sideBar: [
         'columns',

@@ -2,24 +2,33 @@ import {IServerSideGetRowsRequest} from "ag-grid-community/dist/lib/interfaces/i
 import {DuckDbDatasource} from "../index.mjs";
 import {whereFragment} from "../filter";
 import {IServerSideGetRowsParams} from "ag-grid-community";
+import {buildGroupFilter} from "../grouping";
 
 
 export function buildSimpleQuery(params: IServerSideGetRowsParams, datasource: DuckDbDatasource): string {
     const {request} = params;
-    return `
+    const sql = `
         WITH SOURCE AS (${datasource.source}),
         FILTERED AS (
             SELECT * FROM SOURCE
             ${whereFragment(request)}
         ),
-        QUERY AS (
+        GROUPFILTERED AS (
             SELECT * FROM FILTERED
+            ${buildGroupFilter(request)}
+        ),
+        QUERY AS (
+            SELECT * FROM GROUPFILTERED
             ${buildOrderBy(params)}
         )
         
         
     `
+
+    return sql;
 }
+
+
 
 function buildOrderBy({ request, api }: IServerSideGetRowsParams): string {
     if (request.sortModel.length == 0)
