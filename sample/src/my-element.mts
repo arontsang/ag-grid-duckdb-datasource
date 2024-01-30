@@ -6,6 +6,7 @@ import duckdb from "./duckdb.ts"
 import * as agGrid from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css'
 import 'ag-grid-community/styles/ag-theme-alpine.css'
+import {GridOptions} from "ag-grid-community";
 
 /**
  * An example element.
@@ -34,20 +35,23 @@ class AgGridDuckDb extends LitElement {
     const source = `SELECT * FROM read_parquet('${src}')`;
 
     const datasource = new DuckDbDatasource(duckdb, source);
-    agGrid.createGrid(div as HTMLDivElement, {
+    const gridOptions: GridOptions = {
       rowModelType: 'serverSide',
       serverSideDatasource: datasource,
       defaultColDef: {
-        enableRowGroup: true
+        enableRowGroup: true,
+
       },
       columnDefs: [
-        { field: "first_name",  },
-        { field: "last_name" },
+        { field: "first_name", filter: 'agTextColumnFilter'   },
+        { field: "last_name", filter: 'agTextColumnFilter' },
       ],
       sideBar: [
-          'columns'
+        'columns',
+        'filters'
       ]
-    });
+    };
+    agGrid.createGrid(div as HTMLDivElement, gridOptions);
   }
 }
 

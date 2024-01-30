@@ -6,7 +6,7 @@ import {
 
 
 function isText(model: FilterModel | AdvancedFilterModel): model is TextAdvancedFilterModel {
-    return model.type === 'text';
+    return model.filterType === 'text';
 }
 
 export function convertTextFiler(model: FilterModel | AdvancedFilterModel): string | undefined {

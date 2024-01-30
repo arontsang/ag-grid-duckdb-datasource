@@ -6,7 +6,7 @@ import {
 import {convertScalarFiler} from "./scalar";
 
 function isNumeric(model: FilterModel | AdvancedFilterModel): model is NumberAdvancedFilterModel {
-    return model.type === 'number';
+    return model.filterType === 'number';
 }
 
 export function convertNumberFiler(model: FilterModel | AdvancedFilterModel): string | undefined {

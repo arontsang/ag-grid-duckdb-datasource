@@ -6,6 +6,7 @@ import {convertNumberFiler} from "./number";
 import {convertTextFiler} from "./text";
 import {convertJoinFilter} from "./join";
 import {IServerSideGetRowsRequest} from "ag-grid-community/dist/lib/interfaces/iServerSideDatasource";
+import {convertSimpleFilter} from "./simple";
 
 
 
@@ -25,5 +26,6 @@ export function convertFilterImpl(model: FilterModel | AdvancedFilterModel): str
     return convertNumberFiler(model)
         ?? convertTextFiler(model)
         ?? convertJoinFilter(model)
-        ?? convertNumberFiler(model);
+        ?? convertNumberFiler(model)
+        ?? convertSimpleFilter(model);
 }

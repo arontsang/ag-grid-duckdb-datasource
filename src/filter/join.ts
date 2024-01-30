@@ -12,5 +12,5 @@ export function convertJoinFilter(model: FilterModel | AdvancedFilterModel) {
 }
 
 function isJoin(model: FilterModel | AdvancedFilterModel): model is JoinAdvancedFilterModel {
-    return model.type === 'join';
+    return model.filterType === 'join';
 }
