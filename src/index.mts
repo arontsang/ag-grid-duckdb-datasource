@@ -1,11 +1,15 @@
 import {ColumnApi, GridApi, IServerSideDatasource, IServerSideGetRowsParams} from "ag-grid-community";
 import {AsyncDuckDB} from "@duckdb/duckdb-wasm";
 import {IServerSideGetRowsRequest} from "ag-grid-community/dist/lib/interfaces/iServerSideDatasource";
+import {buildSimpleQuery} from "./simple";
+import {buildPivotQuery, isPivotQueryRequest} from "./pivot";
+import {buildGroupQuery} from "./grouping";
+import type * as  arrow from 'apache-arrow';
 
 export class DuckDbDatasource implements IServerSideDatasource {
 
     private readonly database: AsyncDuckDB;
-    private readonly source: string;
+    readonly source: string;
 
 
     constructor(database: AsyncDuckDB, source: string) {
@@ -30,37 +34,47 @@ export class DuckDbDatasource implements IServerSideDatasource {
 
 
     private async getRowsImpl(params: IServerSideGetRowsParams): Promise<[unknown[], number]> {
+        const ctes = this.buildQuery(params);
+
+        const query = `
+            ${ctes}
+            SELECT * FROM QUERY
+            ${this.buildLimit(params)}
+        `;
+        const countQuery = `${ctes} SELECT COUNT(*) FROM QUERY`
+
+
+        const [result, count] = await Promise.all([
+            this.doQueryAsync(query),
+            this.doQueryAsync(countQuery)
+        ]);
+
+
+
+        const ret: [unknown[], number] = [result.toArray(), Number(count.getChildAt(0)!.get(0))];
+        return ret;
+    }
+
+    private async doQueryAsync<T extends { [key: string]: arrow.DataType; }>(query: string) {
         const connection = await this.database.connect();
         try {
-            const query = this.buildQuery(params);
-
-
-            const result = await connection.query(query + this.buildLimit(params)).then(x => x.toArray());
-            const count = await connection.query(`
-                SELECT COUNT(*)
-                FROM (${query})  
-                
-                          
-            `);
-
-            const ret: [unknown[], number] = [result, Number(count.getChildAt(0)!.get(0))];
-            return ret;
-        } finally {
+            return connection.query<T>(query);
+        }
+        finally {
             await connection.close();
         }
-
     }
 
     private buildQuery(params: IServerSideGetRowsParams): string {
-        const sql = `
-                WITH SOURCE AS (${this.source})
-                ${this.buildSelect(params)}
-                FROM SOURCE
-                ${this.filterBy(params)}
-                ${this.buildGroupBy(params)}
-                ${this.buildOrderBy(params)}
-        `
-        return sql;
+        if (isPivotQueryRequest(params.request)){
+            return buildPivotQuery(params, this);
+        }
+
+        if (params.request.rowGroupCols.length == params.request.groupKeys.length){
+            return buildSimpleQuery(params, this);
+        }
+
+        return buildGroupQuery(params.request, this);
     }
 
     private buildSelect({ request, api }: IServerSideGetRowsParams): string {
@@ -76,19 +90,7 @@ export class DuckDbDatasource implements IServerSideDatasource {
         return "SELECT *"
     }
 
-    private buildOrderBy({ request, api, columnApi }: IServerSideGetRowsParams): string {
-        if (request.sortModel.length == 0)
-            return "";
 
-        const sort = request.sortModel
-
-            .filter(x => api.getColumn(x.colId)?.getColDef().field)
-            .map(x => `${x.colId} ${x.sort}`)
-            .join(", ")
-
-
-        return `ORDER BY ${sort}`;
-    }
 
     private buildLimit({ request, api }: IServerSideGetRowsParams): string {
         if (request.startRow && request.endRow){

@@ -1,39 +1,27 @@
-import {IServerSideGetRowsRequest} from "ag-grid-community/dist/lib/interfaces/iServerSideDatasource";
 import {FilterModel} from "ag-grid-community/dist/lib/interfaces/iFilter";
 import {
-    AdvancedFilterModel,
-    ColumnAdvancedFilterModel, JoinAdvancedFilterModel, NumberAdvancedFilterModel
+    AdvancedFilterModel
 } from "ag-grid-community/dist/lib/interfaces/advancedFilterModel";
 import {convertNumberFiler} from "./number";
 import {convertTextFiler} from "./text";
 import {convertJoinFilter} from "./join";
+import {IServerSideGetRowsRequest} from "ag-grid-community/dist/lib/interfaces/iServerSideDatasource";
 
 
-export function createFilterSql(request: IServerSideGetRowsRequest): string[] {
-    const ret = new Array<string>();
-
-    request.groupKeys.forEach(function (groupKey, index){
-        const columnName = request.rowGroupCols[index].field;
-        ret.push(`"${columnName}" = '${groupKey}'`)
-    });
-
-    if (request.filterModel){
-        request.filterModel
 
 
-    }
 
+export function whereFragment(request: IServerSideGetRowsRequest): string {
+    if (!request.filterModel) return "";
 
-    return ret;
+    const filters = convertFilterImpl(request.filterModel);
+    if (!filters) return "";
+
+    return ` WHERE ${filters} `
 }
 
 
-
-
-
-
-
-export function convertFilter(model: FilterModel | AdvancedFilterModel): string | undefined {
+export function convertFilterImpl(model: FilterModel | AdvancedFilterModel): string | undefined {
     return convertNumberFiler(model)
         ?? convertTextFiler(model)
         ?? convertJoinFilter(model)
