@@ -45,8 +45,11 @@ function buildSelect( request : IServerSideGetRowsRequest): string {
     if (request.rowGroupCols && request.groupKeys){
         if (request.groupKeys.length < request.rowGroupCols.length){
             const column = request.rowGroupCols[request.groupKeys.length];
-
-            return `SELECT ${column.field} `
+            const columns = [
+                request.rowGroupCols[request.groupKeys.length].field,
+                ...request.valueCols.map(x => `${x.aggFunc}(${x.field}) AS ${x.field}`)
+            ]
+            return `SELECT ${columns.join(',')} `
         }
     }
 

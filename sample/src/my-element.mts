@@ -45,8 +45,11 @@ class AgGridDuckDb extends LitElement {
       columnDefs: [
         { field: "first_name", filter: 'agTextColumnFilter'   },
         { field: "last_name", filter: 'agTextColumnFilter' },
+        { field: "title", filter: 'agTextColumnFilter' },
         { field: "gender", filter: 'agSetColumnFilter' },
         { field: "country", filter: 'agSetColumnFilter' },
+        { field: "salary", filter: 'agNumberColumnFilter', defaultAggFunc: 'sum', allowedAggFuncs: ['sum', 'min', 'max', 'avg'], enableValue: true },
+        { field: "birthdate", filter: 'agDateColumnFilter' },
       ],
       sideBar: [
         'columns',

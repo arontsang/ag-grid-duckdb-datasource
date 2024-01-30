@@ -8,6 +8,7 @@ import {convertJoinFilter} from "./join";
 import {IServerSideGetRowsRequest} from "ag-grid-community/dist/lib/interfaces/iServerSideDatasource";
 import {convertSimpleFilter} from "./simple";
 import {convertSetFiler} from "./set";
+import {convertDateFiler} from "./date";
 
 
 
@@ -26,6 +27,7 @@ export function whereFragment(request: IServerSideGetRowsRequest): string {
 export function convertFilterImpl(model: FilterModel | AdvancedFilterModel): string | undefined {
     return convertNumberFiler(model)
         ?? convertTextFiler(model)
+        ?? convertDateFiler(model)
         ?? convertJoinFilter(model)
         ?? convertSetFiler(model)
         ?? convertSimpleFilter(model);

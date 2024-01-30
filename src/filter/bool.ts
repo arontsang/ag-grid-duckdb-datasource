@@ -5,7 +5,7 @@ import {
 
 
 function isBool(model: FilterModel | AdvancedFilterModel): model is BooleanAdvancedFilterModel {
-    return model.type === 'boolean';
+    return model.filterType === 'boolean';
 }
 
 export function convertNumberFiler(model: FilterModel | AdvancedFilterModel): string | undefined {
