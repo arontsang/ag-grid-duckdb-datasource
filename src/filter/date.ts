@@ -1,7 +1,6 @@
 import {FilterModel} from "ag-grid-community/dist/lib/interfaces/iFilter";
 import {
-    AdvancedFilterModel, DateAdvancedFilterModel,
-    NumberAdvancedFilterModel
+    AdvancedFilterModel, DateAdvancedFilterModel
 } from "ag-grid-community/dist/lib/interfaces/advancedFilterModel";
 import {convertScalarFiler} from "./scalar";
 

@@ -1,7 +1,6 @@
 import {FilterModel} from "ag-grid-community/dist/lib/interfaces/iFilter";
 import {
-    AdvancedFilterModel,
-    NumberAdvancedFilterModel, TextAdvancedFilterModel
+    AdvancedFilterModel, TextAdvancedFilterModel
 } from "ag-grid-community/dist/lib/interfaces/advancedFilterModel";
 
 

@@ -1,17 +1,14 @@
 import {
     ColDef,
     ColGroupDef,
-    ColumnApi,
-    GridApi, GridOptions,
+    GridOptions,
     IServerSideDatasource,
     IServerSideGetRowsParams
 } from "ag-grid-community";
 import {AsyncDuckDB} from "@duckdb/duckdb-wasm";
-import {IServerSideGetRowsRequest} from "ag-grid-community/dist/lib/interfaces/iServerSideDatasource";
 import {buildSimpleQuery} from "./simple";
 import {buildPivotQuery, isPivotQueryRequest} from "./pivot";
 import {buildGroupQuery} from "./grouping";
-import type * as  arrow from 'apache-arrow';
 
 const setFilterCallbackSet = Symbol();
 
@@ -42,8 +39,6 @@ export class DuckDbDatasource implements IServerSideDatasource {
     }
 
     async getRows(params: IServerSideGetRowsParams) {
-
-
         const columnDefs = params.api.getGridOption('columnDefs');
         if(columnDefs && !setFilterCallbackAlreadySet(columnDefs)) {
             this.setSetFilterCallback(columnDefs);
@@ -113,9 +108,10 @@ export class DuckDbDatasource implements IServerSideDatasource {
         return ret;
     }
 
-    private async doQueryAsync<T extends { [key: string]: arrow.DataType; }>(query: string) {
+    private async doQueryAsync<T>(query: string) {
         const connection = await this.database.connect();
         try {
+            // @ts-ignore
             return connection.query<T>(query);
         }
         finally {
@@ -135,31 +131,10 @@ export class DuckDbDatasource implements IServerSideDatasource {
         return buildGroupQuery(params, this);
     }
 
-
-
-
-
-    private buildLimit({ request, api }: IServerSideGetRowsParams): string {
+    private buildLimit({ request }: IServerSideGetRowsParams): string {
         if (request.startRow && request.endRow){
             return ` LIMIT ${request.endRow - request.startRow} OFFSET ${request.startRow}`
         }
         return "";
-    }
-
-
-
-    private filterBy({ request, api }: IServerSideGetRowsParams<any, any>): string {
-        const groupFilter =
-            request.groupKeys.map((groupValue, index) => {
-                const groupColumn = request.rowGroupCols[index];
-                return ` "${groupColumn.field}" = '${groupValue}' `;
-            });
-
-
-        //const preFilter = request.filterModel;
-
-        if (!groupFilter.length) return "";
-
-        return ` WHERE ${groupFilter.join(' AND ')} `;
     }
 }

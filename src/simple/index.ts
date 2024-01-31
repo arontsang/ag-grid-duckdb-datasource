@@ -1,4 +1,3 @@
-import {IServerSideGetRowsRequest} from "ag-grid-community/dist/lib/interfaces/iServerSideDatasource";
 import {DuckDbDatasource} from "../index.mjs";
 import {whereFragment} from "../filter";
 import {IServerSideGetRowsParams} from "ag-grid-community";
