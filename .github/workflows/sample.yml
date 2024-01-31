@@ -30,6 +30,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          lfs: 'true'
+      - name: Checkout LFS objects
+        run: git lfs checkout
       - name: Set up Node
         uses: actions/setup-node@v3
         with:
