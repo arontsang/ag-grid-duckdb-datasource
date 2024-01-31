@@ -31,7 +31,7 @@ class AgGridDuckDb extends LitElement {
   onDivChanged(div: Element | undefined): void {
     if (!div) return;
 
-    const src = new URL("/userdata1.parquet", document.baseURI).href
+    const src = new URL("./userdata1.parquet", document.baseURI).href
     const source = `SELECT * FROM read_parquet('${src}')`;
 
     const datasource = new DuckDbDatasource(duckdb, source);
