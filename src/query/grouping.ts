@@ -25,10 +25,30 @@ export class GroupingQueryBuilder extends QueryBuilder{
         QUERY AS (
             ${buildSelect(request)}
             FROM GROUPFILTERED
-            ${buildGroupBy(request)}
-            ${buildOrderBy(request)}
+            ${this.buildGroupBy(request)}
+            ${this.buildGroupOrderBy(request)}
         ) 
         `
+    }
+
+    protected buildGroupBy( request: IServerSideGetRowsRequest): string {
+        if (request.rowGroupCols && request.groupKeys){
+            if (request.groupKeys.length < request.rowGroupCols.length){
+                const column = request.rowGroupCols[request.groupKeys.length];
+
+                return `GROUP BY  ${column.field} `
+            }
+        }
+
+        return "";
+    }
+
+    protected buildGroupOrderBy(request: IServerSideGetRowsRequest): string {
+        const col = groupColumn(request);
+        const sort = request.sortModel.filter(x => x.colId == col.field);
+        if (sort.length == 0) return "";
+
+        return `ORDER BY ${col.field} ${sort[0].sort}`
     }
 
 }
@@ -54,22 +74,5 @@ function buildSelect(request : IServerSideGetRowsRequest): string {
     return "SELECT *"
 }
 
-function buildOrderBy(request: IServerSideGetRowsRequest): string {
-    const col = groupColumn(request);
-    const sort = request.sortModel.filter(x => x.colId == col.field);
-    if (sort.length == 0) return "";
 
-    return `ORDER BY ${col.field} ${sort[0].sort}`
-}
 
-function buildGroupBy( request: IServerSideGetRowsRequest): string {
-    if (request.rowGroupCols && request.groupKeys){
-        if (request.groupKeys.length < request.rowGroupCols.length){
-            const column = request.rowGroupCols[request.groupKeys.length];
-
-            return `GROUP BY  ${column.field} `
-        }
-    }
-
-    return "";
-}

@@ -42,11 +42,12 @@ class AgGridDuckDb extends LitElement {
         enableRowGroup: true,
 
       },
+      serverSidePivotResultFieldSeparator: '_',
       columnDefs: [
         { field: "first_name", filter: 'agTextColumnFilter'   },
         { field: "last_name", filter: 'agTextColumnFilter' },
         { field: "title", filter: 'agTextColumnFilter' },
-        { field: "gender", filter: 'agSetColumnFilter' },
+        { field: "gender", filter: 'agSetColumnFilter', enablePivot: true },
         { field: "country", filter: 'agSetColumnFilter' },
         { field: "salary", filter: 'agNumberColumnFilter', defaultAggFunc: 'sum', allowedAggFuncs: ['sum', 'min', 'max', 'avg'], enableValue: true },
         { field: "birthdate", filter: 'agDateColumnFilter' },

@@ -5,7 +5,6 @@
   "private": true,
   "devDependencies": {
     "ag-grid-community": "^31.0.1",
-    "apache-arrow": "^14.0.0",
     "typescript": "^5.3.3"
   },
   "scripts": {

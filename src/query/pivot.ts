@@ -1,6 +1,7 @@
 import {DuckDbDatasource} from "../index.mjs";
-import {ColDef, IServerSideGetRowsParams} from "ag-grid-community";
 import {GroupingQueryBuilder} from "./grouping";
+import {IServerSideGetRowsParams} from "ag-grid-community";
+import * as arrow from "apache-arrow";
 
 
 export class PivotQueryBuilder extends GroupingQueryBuilder {
@@ -9,11 +10,38 @@ export class PivotQueryBuilder extends GroupingQueryBuilder {
     }
 
     buildQuery(params: IServerSideGetRowsParams): string {
-        return "";
+        const {request} = params;
+        const pivotColumns = [...getPivotColumns(params)];
+        return `
+        WITH SOURCE AS (${this.datasource.source}),
+        FILTERED AS (
+            SELECT * FROM SOURCE
+            ${this.whereFragment(request)}
+        ),
+        GROUPFILTERED AS (
+            SELECT * FROM FILTERED
+            ${this.buildGroupFilter(request)}
+        ),
+        QUERY AS (
+            PIVOT GROUPFILTERED
+            ON ${pivotColumns.map(x => `"${x}"`).join(", ")}
+            USING sum(Salary) as "sum(Salary)"
+            ${this.buildGroupBy(request)}
+            ${this.buildGroupOrderBy(request)}
+        )
+        `
     }
 
 
-    protected async getSecondaryColumns(params: IServerSideGetRowsParams): Promise<ColDef[] | undefined> {
-        return undefined;
+    protected getPivotResultsField(result: arrow.Table, params: IServerSideGetRowsParams): string[] | undefined {
+
+        return ['Male_sum(Salary)', 'Female_sum(Salary)']
     }
+}
+
+function *getPivotColumns(params: IServerSideGetRowsParams): IterableIterator<string> {
+    for (const pivotCol of params.request.pivotCols) {
+    if (pivotCol.field)
+        yield pivotCol.field;
+}
 }

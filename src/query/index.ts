@@ -6,6 +6,7 @@ import {LoadSuccessParams} from "ag-grid-community/dist/lib/rowNodeCache/rowNode
 import {DuckDbDatasource} from "../index.mjs";
 import {ColDef} from "ag-grid-community";
 import {convertFilterImpl, whereFragment} from "../filter";
+import * as arrow from 'apache-arrow';
 
 
 
@@ -34,31 +35,21 @@ export abstract class QueryBuilder implements IQueryBuilder {
         `;
         const countQuery = `${ctes} SELECT COUNT(*) FROM QUERY`
 
-        const me = this;
-        async function getSecondaryColumns() : Promise<undefined | ColDef[]> {
-            if (params.api.getPivotColumns().length){
-                return undefined;
-            }
-
-            return me.getSecondaryColumns(params);
-        }
-
-
-        const [result, count, pivotColumns] = await Promise.all([
+        const [result, count] = await Promise.all([
             this.datasource.doQueryAsync(query),
-            this.datasource.doQueryAsync(countQuery),
-            getSecondaryColumns()
+            this.datasource.doQueryAsync(countQuery)
         ]);
 
-        if(pivotColumns){
-            params.api.setPivotColumns(pivotColumns);
-        }
-
-        return { rowData: result.toArray(), rowCount: Number(count.getChildAt(0)!.get(0)) };
+        const rowData = result.toArray();
+        return {
+            rowData,
+            rowCount: Number(count.getChildAt(0)!.get(0)),
+            pivotResultFields: this.getPivotResultsField(result, params)
+        };
     }
 
-    protected getSecondaryColumns(params: IServerSideGetRowsParams): Promise<undefined | ColDef[]> {
-        return Promise.resolve(undefined);
+    protected getPivotResultsField(result: arrow.Table, params: IServerSideGetRowsParams): string[] | undefined {
+        return undefined;
     }
 
     protected whereFragment(request: IServerSideGetRowsRequest): string {
@@ -96,7 +87,7 @@ export abstract class QueryBuilder implements IQueryBuilder {
         return `ORDER BY ${sort}`;
     }
 
-    private buildLimit({ request }: IServerSideGetRowsParams): string {
+    protected buildLimit({ request }: IServerSideGetRowsParams): string {
         if (request.startRow && request.endRow){
             return ` LIMIT ${request.endRow - request.startRow} OFFSET ${request.startRow}`
         }

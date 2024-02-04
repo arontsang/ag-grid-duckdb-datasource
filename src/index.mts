@@ -12,6 +12,7 @@ import {QueryBuilder} from "./query";
 import {SimpleQueryBuilder} from "./query/simple";
 import {GroupingQueryBuilder} from "./query/grouping";
 import {PivotQueryBuilder} from "./query/pivot";
+import {DataType} from "apache-arrow";
 
 const setFilterCallbackSet = Symbol();
 
@@ -109,10 +110,9 @@ export class DuckDbDatasource implements IServerSideDatasource {
         return this.grouping.getRowsAsync(params);
     }
 
-    public async doQueryAsync<T>(query: string) {
+    public async doQueryAsync<T extends { [key: string]: DataType; }>(query: string) {
         const connection = await this.database.connect();
         try {
-            // @ts-ignore
             return connection.query<T>(query);
         }
         finally {
