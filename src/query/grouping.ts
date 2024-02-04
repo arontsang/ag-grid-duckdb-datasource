@@ -1,19 +1,26 @@
-import {DuckDbDatasource} from "../index.mjs";
-import {IServerSideGetRowsRequest} from "ag-grid-community/dist/lib/interfaces/iServerSideDatasource";
+import {QueryBuilder} from "./index";
 import {ColumnVO, IServerSideGetRowsParams} from "ag-grid-community";
-import { whereFragment } from "../filter";
+import {IServerSideGetRowsRequest} from "ag-grid-community/dist/lib/interfaces/iServerSideDatasource";
+import {DuckDbDatasource} from "../index.mjs";
 
-export function buildGroupQuery(params: IServerSideGetRowsParams, datasource: DuckDbDatasource): string {
-    const {request} = params;
-    return `
-        WITH SOURCE AS (${datasource.source}),
+
+export class GroupingQueryBuilder extends QueryBuilder{
+
+    public constructor(datasource: DuckDbDatasource) {
+        super(datasource);
+    }
+
+    buildQuery(params: IServerSideGetRowsParams): string {
+        const {request} = params;
+        return `
+        WITH SOURCE AS (${this.datasource.source}),
         FILTERED AS (
             SELECT * FROM SOURCE
-            ${whereFragment(request)}
+            ${this.whereFragment(request)}
         ),
         GROUPFILTERED AS (
             SELECT * FROM FILTERED
-            ${buildGroupFilter(request)}
+            ${this.buildGroupFilter(request)}
         ),
         QUERY AS (
             ${buildSelect(request)}
@@ -21,29 +28,16 @@ export function buildGroupQuery(params: IServerSideGetRowsParams, datasource: Du
             ${buildGroupBy(request)}
             ${buildOrderBy(request)}
         ) 
-    `
-}
-
-export function buildGroupFilter(request : IServerSideGetRowsRequest): string {
-    function* getFilterFragments(){
-        let index = 0;
-        while (index < request.groupKeys.length){
-            const column = request.rowGroupCols[index];
-            const value = request.groupKeys[index];
-            yield ` "${column.field}" = '${value}' `;
-            index++;
-        }
+        `
     }
 
-    const filterFragments = [...getFilterFragments()];
-    if (filterFragments.length == 0) return "";
-
-    return ` WHERE ${filterFragments.join(" AND ")}`
 }
+
 
 function groupColumn(request : IServerSideGetRowsRequest): ColumnVO {
     return request.rowGroupCols[request.groupKeys.length];
 }
+
 
 function buildSelect(request : IServerSideGetRowsRequest): string {
 

@@ -6,9 +6,12 @@ import {
     IServerSideGetRowsParams
 } from "ag-grid-community";
 import {AsyncDuckDB} from "@duckdb/duckdb-wasm";
-import {buildSimpleQuery} from "./simple";
-import {buildPivotQuery, isPivotQueryRequest} from "./pivot";
-import {buildGroupQuery} from "./grouping";
+import {isPivotQueryRequest} from "./pivot";
+import {LoadSuccessParams} from "ag-grid-community/dist/lib/rowNodeCache/rowNodeBlock";
+import {QueryBuilder} from "./query";
+import {SimpleQueryBuilder} from "./query/simple";
+import {GroupingQueryBuilder} from "./query/grouping";
+import {PivotQueryBuilder} from "./query/pivot";
 
 const setFilterCallbackSet = Symbol();
 
@@ -26,13 +29,21 @@ function setFilterCallbackAlreadySet(colDefs: GridOptions['columnDefs']) {
 
 export class DuckDbDatasource implements IServerSideDatasource {
 
-    private readonly database: AsyncDuckDB;
+    readonly database: AsyncDuckDB;
     readonly source: string;
+
+    private readonly simple: QueryBuilder;
+    private readonly grouping: QueryBuilder;
+    private readonly pivot: QueryBuilder;
 
 
     constructor(database: AsyncDuckDB, source: string) {
         this.database = database;
         this.source = source;
+
+        this.simple = new SimpleQueryBuilder(this);
+        this.grouping = new GroupingQueryBuilder(this);
+        this.pivot = new PivotQueryBuilder(this);
     }
 
     destroy(): void {
@@ -46,8 +57,8 @@ export class DuckDbDatasource implements IServerSideDatasource {
         }
 
         try {
-            const [result, totalRowCount] = await this.getRowsImpl(params);
-            params.success({ rowData: result, rowCount: totalRowCount })
+            const result = await this.getRowsAsync(params);
+            params.success(result)
         }
         catch {
             params.fail();
@@ -86,29 +97,19 @@ export class DuckDbDatasource implements IServerSideDatasource {
     }
 
 
-    private async getRowsImpl(params: IServerSideGetRowsParams): Promise<[unknown[], number]> {
-        const ctes = this.buildQuery(params);
+    private getRowsAsync(params: IServerSideGetRowsParams): Promise<LoadSuccessParams> {
+        if (isPivotQueryRequest(params.request)){
+            return this.pivot.getRowsAsync(params);
+        }
 
-        const query = `
-            ${ctes}
-            SELECT * FROM QUERY
-            ${this.buildLimit(params)}
-        `;
-        const countQuery = `${ctes} SELECT COUNT(*) FROM QUERY`
+        if (params.request.rowGroupCols.length == params.request.groupKeys.length){
+            return this.simple.getRowsAsync(params);
+        }
 
-
-        const [result, count] = await Promise.all([
-            this.doQueryAsync(query),
-            this.doQueryAsync(countQuery)
-        ]);
-
-
-
-        const ret: [unknown[], number] = [result.toArray(), Number(count.getChildAt(0)!.get(0))];
-        return ret;
+        return this.grouping.getRowsAsync(params);
     }
 
-    private async doQueryAsync<T>(query: string) {
+    public async doQueryAsync<T>(query: string) {
         const connection = await this.database.connect();
         try {
             // @ts-ignore
@@ -117,24 +118,5 @@ export class DuckDbDatasource implements IServerSideDatasource {
         finally {
             await connection.close();
         }
-    }
-
-    private buildQuery(params: IServerSideGetRowsParams): string {
-        if (isPivotQueryRequest(params.request)){
-            return buildPivotQuery(params, this);
-        }
-
-        if (params.request.rowGroupCols.length == params.request.groupKeys.length){
-            return buildSimpleQuery(params, this);
-        }
-
-        return buildGroupQuery(params, this);
-    }
-
-    private buildLimit({ request }: IServerSideGetRowsParams): string {
-        if (request.startRow && request.endRow){
-            return ` LIMIT ${request.endRow - request.startRow} OFFSET ${request.startRow}`
-        }
-        return "";
     }
 }
