@@ -31,8 +31,10 @@ class AgGridDuckDb extends LitElement {
   onDivChanged(div: Element | undefined): void {
     if (!div) return;
 
-    const src = new URL("./userdata1.parquet", document.baseURI).href
+    const src = new URL("./Iris.parquet", document.baseURI).href
     const source = `SELECT * FROM read_parquet('${src}')`;
+    // const src = new URL("./contacts2.csv", document.baseURI).href
+    // const source = `SELECT * FROM read_csv_auto('${src}')`;
 
     const datasource = new DuckDbDatasource(duckdb, source);
     const gridOptions: GridOptions = {
@@ -42,16 +44,30 @@ class AgGridDuckDb extends LitElement {
         enableRowGroup: true,
 
       },
+      suppressFieldDotNotation: true,
       serverSidePivotResultFieldSeparator: '_',
+      // columnDefs: [
+      //   { field: "id", filter: 'agTextColumnFilter'   },
+      //   { field: "first_name", filter: 'agTextColumnFilter'   },
+      //   { field: "last_name", filter: 'agTextColumnFilter' },
+      //   { field: "email", filter: 'agTextColumnFilter' },
+      // ],
       columnDefs: [
-        { field: "first_name", filter: 'agTextColumnFilter'   },
-        { field: "last_name", filter: 'agTextColumnFilter' },
-        { field: "title", filter: 'agTextColumnFilter' },
-        { field: "gender", filter: 'agSetColumnFilter', enablePivot: true },
-        { field: "country", filter: 'agSetColumnFilter' },
-        { field: "salary", filter: 'agNumberColumnFilter', defaultAggFunc: 'sum', allowedAggFuncs: ['sum', 'min', 'max', 'avg'], enableValue: true },
-        { field: "birthdate", filter: 'agDateColumnFilter' },
+        { field: "sepal.length", filter: 'agTextNumberColumnFilter'   },
+        { field: "sepal.width", filter: 'agTextNumberColumnFilter' },
+        { field: "petal.length", filter: 'agTextNumberColumnFilter' },
+        { field: "petal.width", filter: 'agTextNumberColumnFilter' },
+        { field: "variety" },
       ],
+      // columnDefs: [
+      //   { field: "first_name", filter: 'agTextColumnFilter'   },
+      //   { field: "last_name", filter: 'agTextColumnFilter' },
+      //   { field: "title", filter: 'agTextColumnFilter' },
+      //   { field: "gender", filter: 'agSetColumnFilter', enablePivot: true },
+      //   { field: "country", filter: 'agSetColumnFilter' },
+      //   { field: "salary", filter: 'agNumberColumnFilter', defaultAggFunc: 'sum', allowedAggFuncs: ['sum', 'min', 'max', 'avg'], enableValue: true },
+      //   { field: "birthdate", filter: 'agDateColumnFilter' },
+      // ],
       sideBar: [
         'columns',
         'filters'
