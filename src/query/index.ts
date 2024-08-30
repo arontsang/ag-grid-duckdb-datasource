@@ -88,7 +88,8 @@ export abstract class QueryBuilder implements IQueryBuilder {
     }
 
     protected buildLimit({ request }: IServerSideGetRowsParams): string {
-        if (request.startRow && request.endRow){
+        if (typeof(request.startRow) === "number" 
+            && typeof(request.endRow) === "number"){
             return ` LIMIT ${request.endRow - request.startRow} OFFSET ${request.startRow}`
         }
         return "";
