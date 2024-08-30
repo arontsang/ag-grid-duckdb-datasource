@@ -23,17 +23,24 @@ export abstract class QueryBuilder implements IQueryBuilder {
         this.datasource = datasource;
     }
 
-    abstract buildQuery(params: IServerSideGetRowsParams): string
+    abstract buildQuery(params: IServerSideGetRowsParams): string | undefined
 
     async getRowsAsync(params: IServerSideGetRowsParams): Promise<LoadSuccessParams> {
-        const ctes = this.buildQuery(params);
+        const queryBase = this.buildQuery(params);
+
+        if (queryBase === undefined){
+            return {
+                rowData: [],
+                rowCount: 0,
+            }
+        }
 
         const query = `
-            ${ctes}
+            ${queryBase}
             SELECT * FROM QUERY
             ${this.buildLimit(params)}
         `;
-        const countQuery = `${ctes} SELECT COUNT(*) FROM QUERY`
+        const countQuery = `${queryBase} SELECT COUNT(*) FROM QUERY`
 
         const [result, count] = await Promise.all([
             this.datasource.doQueryAsync(query),

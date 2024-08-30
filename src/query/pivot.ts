@@ -9,9 +9,13 @@ export class PivotQueryBuilder extends GroupingQueryBuilder {
         super(datasource);
     }
 
-    buildQuery(params: IServerSideGetRowsParams): string {
+    buildQuery(params: IServerSideGetRowsParams): string | undefined {
         const {request} = params;
         const pivotColumns = [...getPivotColumns(params)];
+
+        if (pivotColumns.length === 0)
+            return undefined;
+
         return `
         WITH SOURCE AS (${this.datasource.source}),
         FILTERED AS (

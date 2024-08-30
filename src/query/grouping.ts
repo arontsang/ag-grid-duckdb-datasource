@@ -10,7 +10,7 @@ export class GroupingQueryBuilder extends QueryBuilder{
         super(datasource);
     }
 
-    buildQuery(params: IServerSideGetRowsParams): string {
+    buildQuery(params: IServerSideGetRowsParams): string | undefined {
         const {request} = params;
         return `
         WITH SOURCE AS (${this.datasource.source}),
