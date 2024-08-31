@@ -43,7 +43,9 @@ export abstract class QueryBuilder implements IQueryBuilder {
         const [result, count, pivotResultFields] = await Promise.all([
             this.datasource.doQueryAsync(query),
             this.datasource.doQueryAsync(countQuery),
-            this.getPivotResultsFieldAsync(params)
+            params.request.startRow == 0
+                ? this.getPivotResultsFieldAsync(params)
+                : undefined
         ]);
 
         const rowData = result.toArray();
@@ -94,7 +96,7 @@ export abstract class QueryBuilder implements IQueryBuilder {
     }
 
     protected buildLimit({ request }: IServerSideGetRowsParams): string {
-        if (typeof(request.startRow) === "number" 
+        if (typeof(request.startRow) === "number"
             && typeof(request.endRow) === "number"){
             return ` LIMIT ${request.endRow - request.startRow} OFFSET ${request.startRow}`
         }
