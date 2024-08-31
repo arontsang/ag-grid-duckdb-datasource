@@ -1,7 +1,6 @@
 import {DuckDbDatasource} from "../index.mjs";
 import {GroupingQueryBuilder} from "./grouping";
 import {ColumnVO, IServerSideGetRowsParams} from "ag-grid-community";
-import * as arrow from "apache-arrow";
 
 
 export class PivotQueryBuilder extends GroupingQueryBuilder {

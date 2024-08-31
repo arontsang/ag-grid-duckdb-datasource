@@ -4,9 +4,7 @@ import {
 } from "ag-grid-community/dist/lib/interfaces/iServerSideDatasource";
 import {LoadSuccessParams} from "ag-grid-community/dist/lib/rowNodeCache/rowNodeBlock";
 import {DuckDbDatasource} from "../index.mjs";
-import {ColDef} from "ag-grid-community";
-import {convertFilterImpl, whereFragment} from "../filter";
-import * as arrow from 'apache-arrow';
+import {whereFragment} from "../filter";
 
 
 
