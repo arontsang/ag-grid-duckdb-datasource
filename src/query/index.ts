@@ -42,21 +42,22 @@ export abstract class QueryBuilder implements IQueryBuilder {
         `;
         const countQuery = `${queryBase} SELECT COUNT(*) FROM QUERY`
 
-        const [result, count] = await Promise.all([
+        const [result, count, pivotResultFields] = await Promise.all([
             this.datasource.doQueryAsync(query),
-            this.datasource.doQueryAsync(countQuery)
+            this.datasource.doQueryAsync(countQuery),
+            await this.getPivotResultsFieldAsync(params)
         ]);
 
         const rowData = result.toArray();
         return {
             rowData,
             rowCount: Number(count.getChildAt(0)!.get(0)),
-            pivotResultFields: this.getPivotResultsField(result, params)
+            pivotResultFields,
         };
     }
 
-    protected getPivotResultsField(result: arrow.Table, params: IServerSideGetRowsParams): string[] | undefined {
-        return undefined;
+    protected getPivotResultsFieldAsync(params: IServerSideGetRowsParams): Promise<string[] | undefined> {
+        return Promise.resolve(undefined);
     }
 
     protected whereFragment(request: IServerSideGetRowsRequest): string {

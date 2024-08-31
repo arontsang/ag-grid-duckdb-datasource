@@ -13,7 +13,7 @@ export class PivotQueryBuilder extends GroupingQueryBuilder {
         const {request} = params;
         const pivotColumns = [...getPivotColumns(params)];
 
-        if (pivotColumns.length === 0)
+        if (pivotColumns.length === 0 || params.request.valueCols.length === 0)
             return undefined;
 
         return `
@@ -28,7 +28,7 @@ export class PivotQueryBuilder extends GroupingQueryBuilder {
         ),
         QUERY AS (
             PIVOT GROUPFILTERED
-            ON ${pivotColumns.map(x => `"${x}"`).join(", ")}
+            ON ${pivotColumns.map(x => `(CASE WHEN ${x} = '' THEN '(Blanks)' ELSE "${x}" END)`).join(" || '_' || ")}
             USING sum(Salary) as "sum(Salary)"
             ${this.buildGroupBy(request)}
             ${this.buildGroupOrderBy(request)}
@@ -37,9 +37,39 @@ export class PivotQueryBuilder extends GroupingQueryBuilder {
     }
 
 
-    protected getPivotResultsField(result: arrow.Table, params: IServerSideGetRowsParams): string[] | undefined {
+    protected async getPivotResultsFieldAsync(params: IServerSideGetRowsParams): Promise<string[] | undefined> {
+        const pivotColumns = [...getPivotColumns(params)];
+        const query = `
+            WITH SOURCE AS (${this.datasource.source})
+            SELECT DISTINCT ${pivotColumns.map(column => `${column}`).join(', ')} FROM SOURCE
+        `
+        
 
-        return ['Male_sum(Salary)', 'Female_sum(Salary)']
+        
+        const columnValues = await this.datasource.doQueryAsync(query);
+
+        function normalizeDimensionValue(value: any): string {
+            if (value === "")
+                return "(Blanks)";
+
+            return value.toString()
+        }
+
+        function *GetPivotValues(): IterableIterator<string> {
+            for (let rowIndex = 0; rowIndex < columnValues.numRows; rowIndex++) {
+                const row = columnValues.get(rowIndex);
+                if (row == null) break;
+                const dimensionValue = pivotColumns
+                    .map(column => normalizeDimensionValue(row[column]))
+                    .join("_")
+
+                for (const measure of params.request.valueCols) {
+                    yield `${dimensionValue}_${measure.aggFunc ?? "sum"}(${measure.displayName})`
+                }
+            }
+        }
+
+        return [...GetPivotValues()];
     }
 }
 
