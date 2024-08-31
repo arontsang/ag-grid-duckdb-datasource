@@ -43,7 +43,7 @@ export abstract class QueryBuilder implements IQueryBuilder {
         const [result, count, pivotResultFields] = await Promise.all([
             this.datasource.doQueryAsync(query),
             this.datasource.doQueryAsync(countQuery),
-            await this.getPivotResultsFieldAsync(params)
+            this.getPivotResultsFieldAsync(params)
         ]);
 
         const rowData = result.toArray();
