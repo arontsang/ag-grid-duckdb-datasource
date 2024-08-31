@@ -43,6 +43,7 @@ class AgGridDuckDb extends LitElement {
 
       },
       serverSidePivotResultFieldSeparator: '_',
+      blockLoadDebounceMillis: 10,
       columnDefs: [
         { field: "first_name", filter: 'agTextColumnFilter'   },
         { field: "last_name", filter: 'agTextColumnFilter' },
