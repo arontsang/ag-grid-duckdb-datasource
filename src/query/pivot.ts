@@ -27,7 +27,7 @@ export class PivotQueryBuilder extends GroupingQueryBuilder {
         ),
         QUERY AS (
             PIVOT GROUPFILTERED
-            ON ${pivotColumns.map(x => `(CASE WHEN ${x} = '' THEN '(Blanks)' ELSE "${x}" END)`).join(" || '_' || ")}
+            ON ${pivotColumns.map(PivotQueryBuilder.columnValueExpression).join(" || '_' || ")}
             ${this.getPivotUsing(params)}
             ${this.buildGroupBy(request)}
             ${this.buildGroupOrderBy(request)}
@@ -47,13 +47,19 @@ export class PivotQueryBuilder extends GroupingQueryBuilder {
 
 
     }
-
+    static columnValueExpression(column: string){
+        return `(CASE WHEN ${column} = '' THEN '(Blanks)' WHEN ${column} IS NULL THEN '(Null)' ELSE "${column}" END)`
+    }
 
     protected async getPivotResultsFieldAsync(params: IServerSideGetRowsParams): Promise<string[] | undefined> {
         const pivotColumns = [...getPivotColumns(params)];
+
+
+
         const query = `
             WITH SOURCE AS (${this.datasource.source})
-            SELECT DISTINCT ${pivotColumns.map(column => `${column}`).join(', ')} FROM SOURCE
+            SELECT DISTINCT ${pivotColumns.map(x => `${PivotQueryBuilder.columnValueExpression(x)} as ${x}`).join(',\n\t\t')} FROM SOURCE
+            ORDER BY ${pivotColumns.join(',')}
         `
         
 
