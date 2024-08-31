@@ -1,6 +1,6 @@
 import {DuckDbDatasource} from "../index.mjs";
 import {GroupingQueryBuilder} from "./grouping";
-import {IServerSideGetRowsParams} from "ag-grid-community";
+import {ColumnVO, IServerSideGetRowsParams} from "ag-grid-community";
 import * as arrow from "apache-arrow";
 
 
@@ -29,11 +29,24 @@ export class PivotQueryBuilder extends GroupingQueryBuilder {
         QUERY AS (
             PIVOT GROUPFILTERED
             ON ${pivotColumns.map(x => `(CASE WHEN ${x} = '' THEN '(Blanks)' ELSE "${x}" END)`).join(" || '_' || ")}
-            USING sum(Salary) as "sum(Salary)"
+            ${this.getPivotUsing(params)}
             ${this.buildGroupBy(request)}
             ${this.buildGroupOrderBy(request)}
         )
         `
+    }
+
+    private getPivotUsing(params: IServerSideGetRowsParams): string {
+        function getExpression(column: ColumnVO): string {
+            const agg = column.aggFunc ?? "sum"
+            const colName = column.displayName;
+            return `${agg}(${colName}) AS "${agg}(${colName})"`
+        }
+        const expressions = params.request.valueCols
+            .map(column => getExpression(column))
+        return `USING ${expressions.join(', ')}`
+
+
     }
 
 
