@@ -206,12 +206,37 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@lit-labs/ssr-dom-shim@npm:^1.2.0":
+  version: 1.3.0
+  resolution: "@lit-labs/ssr-dom-shim@npm:1.3.0"
+  checksum: 743a9b295ef2f186712f08883da553c9990be291409615309c99aa4946cfe440a184e4213c790c24505c80beb86b9cfecf10b5fb30ce17c83698f8424f48678d
+  languageName: node
+  linkType: hard
+
+"@lit/reactive-element@npm:^1.0.0 || ^2.0.0":
+  version: 2.0.4
+  resolution: "@lit/reactive-element@npm:2.0.4"
+  dependencies:
+    "@lit-labs/ssr-dom-shim": "npm:^1.2.0"
+  checksum: 359cc19ea9ee8b65e1417eb9c12f40dddba8f0a5ab32f0e5facaecee6060629e44eb4ca27d9af945fe6eda8c033aa636abaa5f0c4e6a529b224d78674acf47ba
+  languageName: node
+  linkType: hard
+
 "@lit/reactive-element@npm:^2.0.0":
   version: 2.0.3
   resolution: "@lit/reactive-element@npm:2.0.3"
   dependencies:
     "@lit-labs/ssr-dom-shim": "npm:^1.1.2"
   checksum: daa5c52046d0f7969ca3de028c1ccc1cfa7a54c1cafc4587be28158a52acf18c47928158f89c0abbb88244359fec53dd05aba84d9358f3b3ddb15b6154859db4
+  languageName: node
+  linkType: hard
+
+"@lit/task@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "@lit/task@npm:1.0.2"
+  dependencies:
+    "@lit/reactive-element": "npm:^1.0.0 || ^2.0.0"
+  checksum: 888a1b7fbd522d64028c8592feb236ac7bbd57678a4a82e5934abee9c33fe0567af014d72fb6ca0edf6866d9ef182df7ca15500ba493aafd6c26d2e832f341aa
   languageName: node
   linkType: hard
 
@@ -1347,6 +1372,7 @@ __metadata:
   resolution: "sampleb@workspace:sample"
   dependencies:
     "@duckdb/duckdb-wasm": "npm:=1.28.0"
+    "@lit/task": "npm:^1.0.2"
     ag-grid-community: "npm:^31.0.1"
     ag-grid-duckdb-datasource: "npm:0.0.1"
     ag-grid-enterprise: "npm:^31.0.1"

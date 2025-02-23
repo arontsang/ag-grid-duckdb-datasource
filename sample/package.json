@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@duckdb/duckdb-wasm": "=1.28.0",
+    "@lit/task": "^1.0.2",
     "ag-grid-community": "^31.0.1",
     "ag-grid-duckdb-datasource": "0.0.1",
     "ag-grid-enterprise": "^31.0.1",
