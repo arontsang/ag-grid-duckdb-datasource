@@ -35,10 +35,10 @@ jobs:
       - name: Checkout LFS objects
         run: git lfs checkout
       - name: Set up Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: 18
-          cache: 'npm'
+          node-version: 20
+          cache: 'yarn'
       - name: Install dependencies
         run: yarn install
       - name: Build
